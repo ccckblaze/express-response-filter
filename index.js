@@ -12,11 +12,7 @@ module.exports = function (opt) {
 
   function wrap(orig) {
     return function (obj) {
-      const key = opt.query || 'fields';
-      // move fields out of the query sections, for further use
-      const param = this.req.query[key]
-      this.req.fields = param;
-      delete this.req.query[key];
+      const param = this.req.fields;
       if (1 === arguments.length) {
         if(badCode(this.statusCode)) {
           return orig(this.statusCode, arguments[0])
@@ -42,6 +38,10 @@ module.exports = function (opt) {
 
   return function (req, res, next) {
     if (!res.__isJSONMaskWrapped) {
+      const key = opt.query || 'fields';
+      this.req.fields = this.req.query[key];
+      delete this.req.query[key];
+
       res.json = wrap(res.json.bind(res))
       if (req.jsonp) res.jsonp = wrap(res.jsonp.bind(res))
       res.__isJSONMaskWrapped = true
