@@ -1,36 +1,51 @@
-var jsonMask = require('json-mask'),
-  compile = jsonMask.compile,
-  filter = jsonMask.filter;
+const jsonMask = require('json-mask')
+
+const badCode = code => code >= 300 || code < 200
 
 module.exports = function (opt) {
-  opt = opt || {};
+  opt = opt || {}
 
   function partialResponse(obj, fields) {
-    if (!fields) return obj;
-    return filter(obj, compile(fields));
+    if (!fields) return obj
+    return jsonMask(obj, fields)
   }
 
   function wrap(orig) {
     return function (obj) {
-      var param = this.req.query[opt.query || 'fields'];
+      const key = opt.query || 'fields';
+      // move fields out of the query sections, for further use
+      const param = this.req.query[key]
+      this.req.fields = param;
+      delete this.req.query[key];
       if (1 === arguments.length) {
-        orig(partialResponse(obj, param));
-      } else if (2 === arguments.length) {
-        if ('number' === typeof arguments[1]) {
-          orig(arguments[1], partialResponse(obj, param));
+        if(badCode(this.statusCode)) {
+          return orig(this.statusCode, arguments[0])
         } else {
-          orig(obj, partialResponse(arguments[1], param));
+          return orig(partialResponse(obj, param))
         }
       }
-    };
+
+      if ('number' === typeof arguments[1] && !badCode(arguments[1])) {
+        // res.json(body, status) backwards compat
+        return orig(partialResponse(obj, param), arguments[1])
+      }
+
+      if ('number' === typeof obj && !badCode(obj)) {
+        // res.json(status, body) backwards compat
+        return orig(obj, partialResponse(arguments[1], param))
+      }
+
+      // The original actually returns this.send(body)
+      return orig(obj, arguments[1])
+    }
   }
 
   return function (req, res, next) {
     if (!res.__isJSONMaskWrapped) {
-      res.json = wrap(res.json.bind(res));
-      if (req.jsonp) res.jsonp = wrap(res.jsonp.bind(res));
-      res.__isJSONMaskWrapped = true;
+      res.json = wrap(res.json.bind(res))
+      if (req.jsonp) res.jsonp = wrap(res.jsonp.bind(res))
+      res.__isJSONMaskWrapped = true
     }
-    next();
-  };
-};
+    next()
+  }
+}
