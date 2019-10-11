@@ -1,4 +1,4 @@
-# Express Partial Response Middleware [![NPM version](https://badge.fury.io/js/express-partial-response.png)](http://badge.fury.io/js/express-partial-response)
+# Express Response Filter Middleware [![NPM version](https://badge.fury.io/js/express-response-filter.png)](http://badge.fury.io/js/express-response-filter)
 
 This Express Middleware will allow you to send a subset of a JSON object
 instead of an entire object from your HTTP services. To do so, your services
@@ -16,17 +16,17 @@ Use it directly without this middleware if you need more flexibility.*
 # Installation
 
 ```
-npm install express-partial-response
+npm install express-response-filter --save
 ```
 
 # Usage
 
 ```js
 var express = require('express')
-  , partialResponse = require('express-partial-response')
+  , responseFilter = require('express-response-filter')
   , app = express()
 
-app.use(partialResponse())
+app.use(responseFilter())
 
 app.get('/', function (res, res, next) {
   res.json({
@@ -70,7 +70,7 @@ Look at [json-mask](https://github.com/nemtsov/json-mask) for the available synt
 `query` specifies the query-string to use. Defaults to `fields`
 
 ```js
-app.use(partialResponse({
+app.use(responseFilter({
   query: 'filter'
 }))
 ```
@@ -78,3 +78,5 @@ app.use(partialResponse({
 # License
 
 MIT. See LICENSE
+
+# Reference To https://github.com/nemtsov/express-partial-response/
