@@ -1,8 +1,8 @@
 var express = require('express')
-  , partialResponse = require('../')
+  , responseFilter = require('../')
   , app = express()
 
-app.use(partialResponse())
+app.use(responseFilter())
 
 app.get('/', function (res, res, next) {
   res.json({
