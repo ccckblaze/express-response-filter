@@ -1,6 +1,6 @@
 {
   "name": "express-response-filter",
-  "version": "0.3.7",
+  "version": "0.3.8",
   "description": "Express middleware for filtering-out parts of JSON responses based on the `fields` query-string.",
   "main": "index.js",
   "keywords": [

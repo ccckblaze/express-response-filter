@@ -39,8 +39,8 @@ module.exports = function (opt) {
   return function (req, res, next) {
     if (!res.__isJSONMaskWrapped) {
       const key = opt.query || 'fields';
-      this.req.fields = this.req.query[key];
-      delete this.req.query[key];
+      req.fields = req.query[key];
+      delete req.query[key];
 
       res.json = wrap(res.json.bind(res))
       if (req.jsonp) res.jsonp = wrap(res.jsonp.bind(res))
