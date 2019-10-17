@@ -9,7 +9,8 @@ module.exports = function (opt) {
   function partialResponse(obj, req) {
     // get fields key
     const fieldsKey = opt.query || 'fields';
-    const fields = req[fieldsKey];
+    const fieldPrefix = opt.prefix || '';
+    const fields = fieldPrefix + (req[fieldsKey] || "");
 
     if (fields) {
       obj = jsonMask(obj, fields);
