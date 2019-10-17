@@ -9,11 +9,11 @@ module.exports = function (opt) {
   function partialResponse(obj, req) {
     // get fields key
     const fieldsKey = opt.query || 'fields';
-    const fieldPrefix = opt.prefix || '';
-    const fields = fieldPrefix + (req[fieldsKey] || "");
+    const fields = req[fieldsKey];
 
     if (fields) {
-      obj = jsonMask(obj, fields);
+      const fieldPrefix = opt.prefix || '';
+      obj = jsonMask(obj, fieldPrefix + fields);
     }
 
     // use filters to restrict result
