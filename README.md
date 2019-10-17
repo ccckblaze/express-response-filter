@@ -71,6 +71,7 @@ Look at [json-mask](https://github.com/nemtsov/json-mask) for the available synt
 # Options
 
 `query` specifies the query-string to use. Defaults to `fields`
+`prefix` specifies the query-string prefix.
 
 ```js
 app.use(responseFilter({
