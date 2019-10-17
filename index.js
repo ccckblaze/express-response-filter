@@ -8,14 +8,14 @@ module.exports = function (opt) {
 
   function partialResponse(obj, req) {
     // use filters to restrict result
-    const filters = [];
+    let filters = [];
     if (Array.isArray(req.customFilter)) {
       filters = filters.concat(req.customFilter);
     }
     if (Array.isArray(opt.filter)) {
       filters = filters.concat(opt.filter);
-    } else if ('funtion' === typeof opt.filter) {
-      obj = filterFunction(obj);
+    } else if ('function' === typeof opt.filter) {
+      obj = opt.filter(obj);
     }
 
     // filter by array
