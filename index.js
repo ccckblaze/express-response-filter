@@ -1,5 +1,5 @@
 const jsonMask = require('json-mask')
-const omit = require('object.omit')
+const omit = require('omit-deep')
 
 const badCode = code => code >= 300 || code < 200
 
@@ -19,9 +19,7 @@ module.exports = function (opt) {
     // use filters to restrict result
     const filters = req.filters;
     if (Array.isArray(filters)) {
-      obj = omit(obj, function (val, key) {
-        return (filters.find(key) === -1);
-      })
+      obj = omit(obj, filters)
     }
 
     return obj;
