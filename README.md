@@ -28,7 +28,10 @@ var express = require('express')
 
 app.use(responseFilter())
 
-app.get('/', function (res, res, next) {
+app.get('/', function (req, res, next) {
+  // keyword filter, not influenced by user query input
+  req.filters = ["id", "password", "token"];
+
   res.json({
       firstName: 'Mohandas'
     , lastName: 'Gandhi'

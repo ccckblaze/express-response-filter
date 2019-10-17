@@ -1,46 +1,64 @@
 const jsonMask = require('json-mask')
+const omit = require('object.omit')
 
 const badCode = code => code >= 300 || code < 200
 
 module.exports = function (opt) {
   opt = opt || {}
 
-  function partialResponse(obj, fields) {
-    if (!fields) return obj
-    return jsonMask(obj, fields)
+  function partialResponse(obj, req) {
+    // get fields key
+    const fieldsKey = opt.query || 'fields';
+    const fields = req[fieldsKey];
+
+    if (fields) {
+      obj = jsonMask(obj, fields);
+    }
+
+    // use filters to restrict result
+    const filters = req.filters;
+    if (Array.isArray(filters)) {
+      obj = omit(obj, function (val, key) {
+        return (filters.find(key) === -1);
+      })
+    }
+
+    return obj;
   }
 
   function wrap(orig) {
     return function (obj) {
-      const param = this.req.fields;
+      const req = this.req;
       if (1 === arguments.length) {
-        if(badCode(this.statusCode)) {
-          return orig(this.statusCode, arguments[0])
+        if (badCode(this.statusCode)) {
+          return orig(this.statusCode, arguments[0]);
         } else {
-          return orig(partialResponse(obj, param))
+          return orig(partialResponse(obj, req));
         }
       }
 
       if ('number' === typeof arguments[1] && !badCode(arguments[1])) {
         // res.json(body, status) backwards compat
-        return orig(partialResponse(obj, param), arguments[1])
+        return orig(partialResponse(obj, req), arguments[1]);
       }
 
       if ('number' === typeof obj && !badCode(obj)) {
         // res.json(status, body) backwards compat
-        return orig(obj, partialResponse(arguments[1], param))
+        return orig(obj, partialResponse(arguments[1], req));
       }
 
       // The original actually returns this.send(body)
-      return orig(obj, arguments[1])
+      return orig(obj, arguments[1]);
     }
   }
 
   return function (req, res, next) {
     if (!res.__isJSONMaskWrapped) {
-      const key = opt.query || 'fields';
-      req.fields = req.query[key];
-      delete req.query[key];
+      // get fields key
+      const fieldsKey = opt.query || 'fields';
+      // move query to fields
+      req[fieldsKey] = req.query[fieldsKey];
+      delete req.query[fieldsKey];
 
       res.json = wrap(res.json.bind(res))
       if (req.jsonp) res.jsonp = wrap(res.jsonp.bind(res))
