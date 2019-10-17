@@ -26,11 +26,13 @@ var express = require('express')
   , responseFilter = require('express-response-filter')
   , app = express()
 
-app.use(responseFilter())
+app.use(responseFilter({
+  filter: ["test"],
+}))
 
 app.get('/', function (req, res, next) {
   // keyword filter, not influenced by user query input
-  req.filters = ["id", "password", "token"];
+  req.customFilter = ["id", "password", "token"]; // concat to opt.filters array
 
   res.json({
       firstName: 'Mohandas'
@@ -72,6 +74,7 @@ Look at [json-mask](https://github.com/nemtsov/json-mask) for the available synt
 
 `query` specifies the query-string to use. Defaults to `fields`
 `prefix` specifies the query-string prefix.
+`filter` specifies the filter before json-masked.  Array | Function is allowed
 
 ```js
 app.use(responseFilter({

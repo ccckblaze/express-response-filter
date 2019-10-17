@@ -7,6 +7,22 @@ module.exports = function (opt) {
   opt = opt || {}
 
   function partialResponse(obj, req) {
+    // use filters to restrict result
+    const filters = [];
+    if (Array.isArray(req.customFilter)) {
+      filters = filters.concat(req.customFilter);
+    }
+    if (Array.isArray(opt.filter)) {
+      filters = filters.concat(opt.filter);
+    } else if ('funtion' === typeof opt.filter) {
+      obj = filterFunction(obj);
+    }
+
+    // filter by array
+    if (filters.length) {
+      obj = omit(obj, filters)
+    }
+
     // get fields key
     const fieldsKey = opt.query || 'fields';
     const fields = req[fieldsKey];
@@ -14,12 +30,6 @@ module.exports = function (opt) {
     if (fields) {
       const fieldPrefix = opt.prefix || '';
       obj = jsonMask(obj, fieldPrefix + fields);
-    }
-
-    // use filters to restrict result
-    const filters = req.filters;
-    if (Array.isArray(filters)) {
-      obj = omit(obj, filters)
     }
 
     return obj;
