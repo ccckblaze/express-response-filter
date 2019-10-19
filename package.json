@@ -16,7 +16,7 @@
   ],
   "dependencies": {
     "deepdash": "^4.2.16",
-    "json-mask": "0.3.8",
+    "json-mask": "0.3.8"
   },
   "author": "ccckblaze@sina.com",
   "license": "MIT",
