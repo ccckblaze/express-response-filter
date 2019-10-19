@@ -1,6 +1,6 @@
 {
   "name": "express-response-filter",
-  "version": "0.4.6",
+  "version": "0.4.7",
   "description": "Express middleware for filtering-out parts of JSON responses based on the `fields` query-string.",
   "main": "index.js",
   "keywords": [
@@ -15,8 +15,8 @@
     "json"
   ],
   "dependencies": {
+    "deepdash": "^4.2.16",
     "json-mask": "0.3.8",
-    "omit-deep": "^0.3.0"
   },
   "author": "ccckblaze@sina.com",
   "license": "MIT",
