@@ -1,10 +1,14 @@
 const jsonMask = require('json-mask');
-const omitDeep = require('deepdash/omitDeep');
+const eachDeep = require('deepdash/eachDeep');
 
 const badCode = code => code >= 300 || code < 200
 
 module.exports = function (opt) {
   opt = opt || {}
+
+  function isObject(obj) {
+    return obj != null && obj.constructor === Object;
+  }
 
   function partialResponse(obj, req) {
     // use filters to restrict result
@@ -20,9 +24,29 @@ module.exports = function (opt) {
 
     // filter by array
     if (filters.length) {
-      obj = omitDeep(obj, filters, {
+      let breakLoop = false;
+      obj = eachDeep(obj, (value, key, parent, ctx) => {
+        if (ctx.isCircular || breakLoop) {
+          return false;
+        }
+        
+        if(ctx.depth > 10){
+          console.error("filters failed, too much depth of ctx", ctx);
+          breakLoop = true;
+        }
+
+        //do removal
+        if (filters.indexOf(key) !== -1) {
+          if (isObject(parent)) {
+            delete parent[key]
+          }
+          else if (Array.isArray(parent)) {
+            parent.splice(key, 1);
+          }
+        }
+      }, {
         checkCircular: true,
-        keepCircular: false,
+        keepCircular: false
       })
     }
 
