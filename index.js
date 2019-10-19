@@ -1,5 +1,5 @@
-const jsonMask = require('json-mask')
-const omit = require('omit-deep')
+const jsonMask = require('json-mask');
+const omitDeep = require('deepdash/omitDeep');
 
 const badCode = code => code >= 300 || code < 200
 
@@ -20,7 +20,10 @@ module.exports = function (opt) {
 
     // filter by array
     if (filters.length) {
-      obj = omit(obj, filters)
+      obj = omitDeep(obj, filters, {
+        checkCircular: true,
+        keepCircular: false,
+      })
     }
 
     // get fields key
