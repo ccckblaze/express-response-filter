@@ -20,6 +20,9 @@ module.exports = function (opt) {
       filters = filters.concat(opt.filter);
     } else if ('function' === typeof opt.filter) {
       obj = opt.filter(obj, req, res);
+      if(!obj){
+        return null;
+      }
     }
 
     // filter by array
@@ -65,23 +68,37 @@ module.exports = function (opt) {
   function wrap(orig) {
     return function (obj) {
       const req = this.req;
-      const res = this.res;
       if (1 === arguments.length) {
         if (badCode(this.statusCode)) {
           return orig(this.statusCode, arguments[0]);
         } else {
-          return orig(partialResponse(obj, req, res));
+          let ret = partialResponse(obj, req, req.res);
+          if(!ret){
+            // skip send json, when no need to send
+            return;
+          }
+          return orig(ret);
         }
       }
 
       if ('number' === typeof arguments[1] && !badCode(arguments[1])) {
         // res.json(body, status) backwards compat
-        return orig(partialResponse(obj, req, res), arguments[1]);
+        let ret = partialResponse(obj, req, req.res);
+        if(!ret){
+          // skip send json, when no need to send
+          return;
+        }
+        return orig(ret, arguments[1]);
       }
 
       if ('number' === typeof obj && !badCode(obj)) {
         // res.json(status, body) backwards compat
-        return orig(obj, partialResponse(arguments[1], req, res));
+        let ret = partialResponse(arguments[1], req, req.res);
+        if(!ret){
+          // skip send json, when no need to send
+          return;
+        }
+        return orig(obj, ret);
       }
 
       // The original actually returns this.send(body)
