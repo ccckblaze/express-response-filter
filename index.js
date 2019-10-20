@@ -10,7 +10,7 @@ module.exports = function (opt) {
     return obj != null && obj.constructor === Object;
   }
 
-  function partialResponse(obj, req) {
+  function partialResponse(obj, req, res) {
     // use filters to restrict result
     let filters = [];
     if (Array.isArray(req.customFilter)) {
@@ -19,7 +19,7 @@ module.exports = function (opt) {
     if (Array.isArray(opt.filter)) {
       filters = filters.concat(opt.filter);
     } else if ('function' === typeof opt.filter) {
-      obj = opt.filter(obj);
+      obj = opt.filter(obj, req, res);
     }
 
     // filter by array
@@ -65,22 +65,23 @@ module.exports = function (opt) {
   function wrap(orig) {
     return function (obj) {
       const req = this.req;
+      const res = this.res;
       if (1 === arguments.length) {
         if (badCode(this.statusCode)) {
           return orig(this.statusCode, arguments[0]);
         } else {
-          return orig(partialResponse(obj, req));
+          return orig(partialResponse(obj, req, res));
         }
       }
 
       if ('number' === typeof arguments[1] && !badCode(arguments[1])) {
         // res.json(body, status) backwards compat
-        return orig(partialResponse(obj, req), arguments[1]);
+        return orig(partialResponse(obj, req, res), arguments[1]);
       }
 
       if ('number' === typeof obj && !badCode(obj)) {
         // res.json(status, body) backwards compat
-        return orig(obj, partialResponse(arguments[1], req));
+        return orig(obj, partialResponse(arguments[1], req, res));
       }
 
       // The original actually returns this.send(body)
